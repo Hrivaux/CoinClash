@@ -1,0 +1,338 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --font-sf: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  }
+  
+  body {
+    @apply bg-[#0a0a0a] text-white;
+    font-family: var(--font-sf);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  * {
+    @apply border-white/5;
+  }
+}
+
+@keyframes gradient {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: gradient 3s ease infinite;
+}
+
+@layer components {
+  /* === LIQUID GLASS EFFECT === */
+  .liquid-glass {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(40px) saturate(180%);
+    -webkit-backdrop-filter: blur(40px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 
+      0 8px 32px 0 rgba(0, 0, 0, 0.37),
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
+  }
+
+  .liquid-glass-hover {
+    @apply liquid-glass transition-all duration-500 ease-out;
+  }
+
+  .liquid-glass-hover:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    transform: translateY(-2px);
+    box-shadow: 
+      0 12px 48px 0 rgba(0, 0, 0, 0.5),
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
+  }
+
+  /* === APPLE-STYLE BUTTONS === */
+  .btn-apple {
+    @apply px-8 py-4 rounded-2xl font-semibold text-[15px] tracking-tight
+           transition-all duration-300 ease-out
+           active:scale-95;
+    background: rgba(255, 255, 255, 0.95);
+    color: #000;
+    box-shadow: 
+      0 4px 16px rgba(0, 0, 0, 0.12),
+      inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  }
+
+  .btn-apple:hover {
+    background: rgba(255, 255, 255, 1);
+    box-shadow: 
+      0 8px 24px rgba(0, 0, 0, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    transform: translateY(-1px);
+  }
+
+  .btn-apple-secondary {
+    @apply px-8 py-4 rounded-2xl font-semibold text-[15px] tracking-tight
+           transition-all duration-300 ease-out
+           active:scale-95 liquid-glass;
+    color: rgba(255, 255, 255, 0.9);
+  }
+
+  .btn-apple-secondary:hover {
+    background: rgba(255, 255, 255, 0.08);
+    transform: translateY(-1px);
+  }
+
+  /* === LIQUID GLASS CARD === */
+  .card-liquid {
+    @apply liquid-glass rounded-3xl p-8
+           transition-all duration-500 ease-out;
+  }
+
+  .card-liquid-hover {
+    @apply card-liquid cursor-pointer;
+  }
+
+  .card-liquid-hover:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 
+      0 20px 60px 0 rgba(0, 0, 0, 0.5),
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
+  }
+
+  /* === APPLE INPUT === */
+  .input-apple {
+    @apply liquid-glass px-5 py-4 w-full text-white text-[15px]
+           rounded-xl placeholder-white/30
+           focus:outline-none focus:ring-2 focus:ring-white/20 focus:border-white/20
+           transition-all duration-300;
+  }
+
+  .input-apple:focus {
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  /* === FLUID ANIMATIONS === */
+  @keyframes fluid-1 {
+    0%, 100% { 
+      transform: translate(0, 0) scale(1);
+      opacity: 0.3;
+    }
+    50% { 
+      transform: translate(30px, -30px) scale(1.1);
+      opacity: 0.5;
+    }
+  }
+
+  @keyframes fluid-2 {
+    0%, 100% { 
+      transform: translate(0, 0) scale(1);
+      opacity: 0.3;
+    }
+    50% { 
+      transform: translate(-40px, 40px) scale(1.15);
+      opacity: 0.5;
+    }
+  }
+
+  @keyframes fluid-3 {
+    0%, 100% { 
+      transform: translate(0, 0) scale(1) rotate(0deg);
+      opacity: 0.25;
+    }
+    50% { 
+      transform: translate(20px, -50px) scale(1.2) rotate(90deg);
+      opacity: 0.4;
+    }
+  }
+
+  .fluid-orb-1 {
+    animation: fluid-1 20s ease-in-out infinite;
+  }
+
+  .fluid-orb-2 {
+    animation: fluid-2 25s ease-in-out infinite;
+  }
+
+  .fluid-orb-3 {
+    animation: fluid-3 30s ease-in-out infinite;
+  }
+
+  /* === MINIMAL SPINNER === */
+  .spinner-apple {
+    @apply w-5 h-5 border-2 border-white/20 border-t-white rounded-full;
+    animation: spin-smooth 0.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  }
+
+  @keyframes spin-smooth {
+    to { transform: rotate(360deg); }
+  }
+
+  /* === BADGE MINIMAL === */
+  .badge-minimal {
+    @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-medium
+           tracking-tight liquid-glass;
+  }
+
+  /* === SMOOTH SCROLLBAR === */
+  .scrollbar-minimal::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  .scrollbar-minimal::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .scrollbar-minimal::-webkit-scrollbar-thumb {
+    @apply bg-white/10 rounded-full hover:bg-white/20;
+    transition: background 0.3s ease;
+  }
+
+  /* === MODAL BACKDROP === */
+  .modal-backdrop-apple {
+    @apply fixed inset-0 z-50 flex items-center justify-center p-6
+           bg-black/60 backdrop-blur-2xl;
+  }
+
+  /* === SHIMMER SUBTLE === */
+  .shimmer-subtle {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .shimmer-subtle::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.05) 50%,
+      transparent 100%
+    );
+    animation: shimmer-move 3s ease-in-out infinite;
+  }
+
+  @keyframes shimmer-move {
+    0% { left: -100%; }
+    100% { left: 100%; }
+  }
+
+  /* === SMOOTH SCALE === */
+  .hover-scale {
+    @apply transition-transform duration-300 ease-out hover:scale-105 active:scale-95;
+  }
+
+  /* === TEXT STYLES === */
+  .text-hero {
+    @apply text-7xl font-bold tracking-tighter leading-none;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+  }
+
+  .text-title {
+    @apply text-5xl font-bold tracking-tight;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+
+  .text-subtitle {
+    @apply text-xl font-medium tracking-tight text-white/60;
+  }
+
+  .text-body {
+    @apply text-[15px] leading-relaxed text-white/70;
+  }
+
+  /* === DIVIDER === */
+  .divider-minimal {
+    @apply w-full h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent;
+  }
+
+  /* === GLOW EFFECT === */
+  .glow-white {
+    box-shadow: 0 0 60px rgba(255, 255, 255, 0.1);
+  }
+
+  .glow-white-strong {
+    box-shadow: 0 0 80px rgba(255, 255, 255, 0.15);
+  }
+
+  /* === FROSTED HEADER === */
+  .header-frosted {
+    @apply liquid-glass border-b border-white/5;
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+  }
+
+  /* === PULSE MINIMAL === */
+  @keyframes pulse-minimal {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+
+  .pulse-minimal {
+    animation: pulse-minimal 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  /* === FLOAT GENTLE === */
+  @keyframes float-gentle {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+  }
+
+  .float-gentle {
+    animation: float-gentle 4s ease-in-out infinite;
+  }
+
+  /* === ICON SIZE === */
+  .icon-lg {
+    @apply text-5xl;
+  }
+
+  .icon-xl {
+    @apply text-6xl;
+  }
+
+  /* === GRID PATTERN === */
+  .grid-pattern {
+    background-image: 
+      linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+    background-size: 50px 50px;
+  }
+
+  /* === STATUS DOT === */
+  .status-online {
+    @apply w-2 h-2 rounded-full bg-green-400;
+    box-shadow: 0 0 8px rgba(74, 222, 128, 0.6);
+  }
+
+  /* === LINK STYLE === */
+  .link-minimal {
+    @apply text-white/60 hover:text-white transition-colors duration-300 text-[13px] font-medium;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .backdrop-blur-apple {
+    backdrop-filter: blur(40px) saturate(180%);
+    -webkit-backdrop-filter: blur(40px) saturate(180%);
+  }
+}
