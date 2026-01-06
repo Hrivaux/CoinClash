@@ -53,25 +53,33 @@ export default function Home() {
     checkAuth()
   }, [])
 
-  useEffect(() => {
-    // Vérifier si une partie est en cours
-    if (!loading && socketManager.isConnected()) {
-      checkActiveGame()
-      loadUserStats()
-    }
-  }, [loading, currentGame, currentRoom, playerId])
-
   const checkAuth = async () => {
     if (!username || !playerId) {
       router.push('/login')
       return
     }
 
-    if (!socketManager.isConnected()) {
-      socketManager.connect(username, playerId)
+    const socket = socketManager.getSocket()
+    if (!socket || !socket.connected) {
+      const newSocket = socketManager.connect(username, playerId)
+      // Attendre que le socket se connecte
+      newSocket?.once('connect', () => {
+        checkActiveGame()
+        loadUserStats()
+        setLoading(false)
+      })
+      newSocket?.once('connect_error', () => {
+        // Même s'il y a une erreur, on charge la page
+        setLoading(false)
+      })
+      // Timeout de sécurité
+      setTimeout(() => setLoading(false), 5000)
+    } else {
+      // Socket déjà connecté
+      checkActiveGame()
+      loadUserStats()
+      setLoading(false)
     }
-
-    setLoading(false)
   }
 
   const checkActiveGame = () => {
@@ -81,41 +89,54 @@ export default function Home() {
       return
     }
 
-    // Si on a déjà une partie en cours dans le store, on l'affiche
+    // Vérifier d'abord le store (en mémoire)
     if (currentGame && currentGame.status === 'playing' && currentRoom) {
+      console.log('[HOME] Active game found in store:', currentRoom.code);
       setCheckingGame(false)
       return
     }
 
-    // Sinon, on vérifie avec le serveur
-    // Le serveur devrait nous renvoyer l'état de la partie si on est dans une room
+    // Vérifier le localStorage pour une partie sauvegardée (après rechargement)
+    try {
+      const savedRoomCode = localStorage.getItem('lastRoomCode')
+      const savedGameStatus = localStorage.getItem('lastGameStatus')
+      
+      if (savedRoomCode && savedGameStatus === 'playing') {
+        console.log('[HOME] Rejoining saved room:', savedRoomCode)
+        // Rediriger vers la room
+        router.push(`/room/${savedRoomCode}`)
+        return
+      }
+      
+      // Nettoyer le localStorage si pas de partie active
+      localStorage.removeItem('lastRoomCode')
+      localStorage.removeItem('lastGameStatus')
+    } catch (error) {
+      console.error('[HOME] Error checking saved room:', error)
+    }
+
     setCheckingGame(false)
   }
 
   const loadUserStats = () => {
     if (!playerId) return
 
-    const socket = socketManager.getSocket()
-    if (!socket) return
-
-    socket.emit('profile:get', playerId, (profile: any) => {
-      if (profile) {
-        setUserStats({
-          level: profile.level || 1,
-          xp: profile.xp || 0,
-          gamesWon: profile.globalStats?.gamesWon || 0,
-          gamesPlayed: profile.globalStats?.gamesPlayed || 0,
-          badges: profile.badges?.length || 0,
-        })
-      }
+    // TODO: Implémenter la récupération du profil via Supabase
+    // Pour l'instant, initialiser avec des valeurs par défaut
+    setUserStats({
+      level: 1,
+      xp: 0,
+      gamesWon: 0,
+      gamesPlayed: 0,
+      badges: 0,
     })
   }
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
     socketManager.disconnect()
-    setUsername(null)
-    setPlayerId(null)
+    setUsername('')
+    setPlayerId('')
     router.push('/login')
   }
 

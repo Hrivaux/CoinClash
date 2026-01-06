@@ -42,6 +42,9 @@ export default function RoomPage() {
   const [showConfirmLeave, setShowConfirmLeave] = useState(false)
   const [connectionStatus, setConnectionStatus] = useState<'connected' | 'disconnected' | 'reconnecting'>('connected')
 
+  // Track if we've already joined to avoid rejoining on every render
+  const [hasAttemptedJoin, setHasAttemptedJoin] = useState(false)
+
   useEffect(() => {
     const socket = socketManager.getSocket()
     
@@ -50,64 +53,42 @@ export default function RoomPage() {
       return
     }
 
-    // Auto-join room on mount or reconnect
-    const joinRoom = () => {
-      if (socket.connected) {
-        console.log('[Room] Auto-joining room:', roomCode, 'isJoined:', isJoined, 'hasGame:', !!currentGame)
-        // Always try to join, even if isJoined is true (in case of page refresh/back button)
+    // Auto-join room on mount only
+    if (!hasAttemptedJoin && socket.connected) {
+      console.log('[Room] Auto-joining room:', roomCode)
+      setHasAttemptedJoin(true)
+      socket.emit('room:join', roomCode, (success) => {
+        if (success) {
+          setIsJoined(true)
+          setConnectionStatus('connected')
+          console.log('[Room] Successfully joined room, waiting for game state...')
+        } else {
+          console.error('[Room] Failed to join room')
+          router.push('/')
+        }
+      })
+    } else if (!hasAttemptedJoin && !socket.connected) {
+      console.log('[Room] Socket not connected, waiting...')
+      const handleConnect = () => {
+        console.log('[Room] Socket connected, joining room...')
+        setHasAttemptedJoin(true)
         socket.emit('room:join', roomCode, (success) => {
           if (success) {
             setIsJoined(true)
             setConnectionStatus('connected')
-            console.log('[Room] Successfully joined room, waiting for game state...')
           } else {
-            console.error('[Room] Failed to join room - this might be a reconnection issue')
-            // Don't redirect immediately - wait a bit for reconnection to complete
-            // The backend should handle reconnections automatically
-            setTimeout(() => {
-              // Check again if we're still not joined
-              if (!isJoined && !currentGame) {
-                console.error('[Room] Still not joined after timeout, redirecting...')
-                router.push('/')
-              }
-            }, 2000) // Wait 2 seconds for reconnection
+            router.push('/')
           }
         })
-      } else {
-        console.log('[Room] Socket not connected, waiting for connection...')
-        // Wait for socket to connect
-        socket.once('connect', () => {
-          console.log('[Room] Socket connected, joining room...')
-          joinRoom()
-        })
+        socket.off('connect', handleConnect)
       }
-    }
-
-    // Initial join
-    if (socket.connected) {
-      joinRoom()
+      socket.on('connect', handleConnect)
     }
 
     // Connection status listeners
-    socket.on('connect', () => {
-      console.log('[Room] Socket connected, rejoining room...')
-      setConnectionStatus('connected')
-      joinRoom()
-    })
-
     socket.on('disconnect', () => {
       console.log('[Room] Socket disconnected')
       setConnectionStatus('disconnected')
-    })
-
-    socket.on('reconnect', () => {
-      console.log('[Room] Socket reconnected, rejoining room...')
-      setConnectionStatus('reconnecting')
-      setTimeout(() => {
-        if (socket.connected) {
-          joinRoom()
-        }
-      }, 500)
     })
 
     // Listen for room updates
@@ -128,21 +109,6 @@ export default function RoomPage() {
 
     socket.on('room:player_left', (data) => {
       console.log('[Room] Player left:', data)
-      // Could show a toast notification here
-    })
-
-    socket.on('room:player_reconnected', (player) => {
-      console.log('[Room] Player reconnected:', player.username)
-      // Could show a toast notification here
-    })
-
-    socket.on('room:host_changed', (data) => {
-      console.log('[Room] Host changed:', data)
-      // Update room to reflect new host
-      if (currentRoom) {
-        setCurrentRoom({ ...currentRoom })
-      }
-      // Could show a toast notification here with data.message
     })
 
     socket.on('game:started', (game) => {
@@ -150,30 +116,35 @@ export default function RoomPage() {
     })
 
     socket.on('game:state', (game) => {
+      console.log('[Room] Game state updated, status:', game.status)
       setCurrentGame(game)
+      // Save room code and game status to localStorage for reconnection
+      if (game.status === 'playing') {
+        localStorage.setItem('lastRoomCode', roomCode)
+        localStorage.setItem('lastGameStatus', 'playing')
+      }
     })
 
     socket.on('game:ended', (game, rankings) => {
       console.log('[Game] Game ended!', game, rankings)
       setCurrentGame(game)
       setGameEndData({ game, rankings })
+      // Clean up localStorage - game is finished
+      localStorage.removeItem('lastRoomCode')
+      localStorage.removeItem('lastGameStatus')
     })
 
     return () => {
-      socket.off('connect')
       socket.off('disconnect')
-      socket.off('reconnect')
       socket.off('room:updated')
       socket.off('room:joined')
       socket.off('room:player_joined')
       socket.off('room:player_left')
-      socket.off('room:player_reconnected')
-      socket.off('room:host_changed')
       socket.off('game:started')
       socket.off('game:state')
       socket.off('game:ended')
     }
-  }, [setCurrentRoom, setCurrentGame, router, roomCode, isJoined, currentGame])
+  }, [roomCode, router, setCurrentRoom, setCurrentGame, hasAttemptedJoin])
 
   const handleReady = () => {
     const socket = socketManager.getSocket()
@@ -234,6 +205,9 @@ export default function RoomPage() {
     if (socket) {
       socket.emit('room:leave')
     }
+    // Clear saved room when explicitly leaving
+    localStorage.removeItem('lastRoomCode')
+    localStorage.removeItem('lastGameStatus')
     setIsJoined(false)
     router.push('/')
   }
@@ -318,7 +292,9 @@ export default function RoomPage() {
 
   // Otherwise show room lobby
   return (
-    <main className="min-h-screen bg-gradient-to-br from-[#0a0a0a] via-[#111] to-[#0a0a0a] relative overflow-hidden">
+    <main style={{
+      background: 'var(--room-bg, linear-gradient(to bottom right, rgb(10, 10, 10) 0%, rgb(17, 17, 17) 50%, rgb(10, 10, 10) 100%))'
+    }} className="min-h-screen relative overflow-hidden">
       {/* Connection Status Banner */}
       {connectionStatus !== 'connected' && (
         <motion.div

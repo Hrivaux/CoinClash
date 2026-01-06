@@ -155,8 +155,9 @@ export default function CreateRoomModal({ onClose }: CreateRoomModalProps) {
                 <div className="font-bold text-lg mb-1">Standard</div>
                 <div className="text-sm text-white/50 mb-3">Partie complète et stratégique</div>
                 <div className="flex gap-2 text-xs">
-                  <span className="badge-minimal">50 points</span>
-                  <span className="badge-minimal">30 tours</span>
+                  <span className="badge-minimal">30 points</span>
+                  <span className="badge-minimal">20 tours</span>
+                  <span className="badge-minimal">35 pièces</span>
                 </div>
               </motion.button>
 
@@ -185,6 +186,7 @@ export default function CreateRoomModal({ onClose }: CreateRoomModalProps) {
                 <div className="flex gap-2 text-xs">
                   <span className="badge-minimal">20 points</span>
                   <span className="badge-minimal">12 tours</span>
+                  <span className="badge-minimal">25 pièces</span>
                 </div>
               </motion.button>
             </div>

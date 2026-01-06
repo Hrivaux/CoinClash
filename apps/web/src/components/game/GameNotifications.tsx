@@ -58,9 +58,15 @@ export default function GameNotifications() {
 
     // Listen for winner announcement
     const handleTurnResult = (result: any) => {
-      if (result.winner) {
+      // Use enriched winner info if available, otherwise fall back to winner ID
+      const winnerInfo = result.winnerInfo || (result.winner && { id: result.winner });
+      
+      if (winnerInfo) {
+        const winnerUsername = winnerInfo.username || 'Joueur inconnu';
+        const winnerBet = winnerInfo.currentBet || result.bets?.[winnerInfo.id] || 0;
+        
         // Create unique ID based on turn result
-        const uniqueId = `winner-${result.winner.id}-${result.turn || Date.now()}`
+        const uniqueId = `winner-${winnerInfo.id}-${result.turnNumber || Date.now()}`
         
         // Skip if already processed
         if (processedIdsRef.current.has(uniqueId)) {
@@ -71,9 +77,9 @@ export default function GameNotifications() {
         setNotifications(prev => [{
           id: uniqueId,
           type: 'winner',
-          message: `🏆 ${result.winner.username} remporte ce tour avec ${result.winner.currentBet} pièces !`,
-          playerName: result.winner.username,
-          amount: result.winner.currentBet,
+          message: `🏆 ${winnerUsername} remporte ce tour avec ${winnerBet} pièces !`,
+          playerName: winnerUsername,
+          amount: winnerBet,
           icon: '🏆',
           timestamp: Date.now(),
         }, ...prev].slice(0, 10))

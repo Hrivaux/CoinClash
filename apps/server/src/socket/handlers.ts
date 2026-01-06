@@ -1452,7 +1452,24 @@ function startPhaseUpdates(
       const resultKey = `result-${phaseKey}`;
       if (!sent.has(resultKey)) {
         const lastResult = game.turnHistory[game.turnHistory.length - 1];
-        io.to(roomCode).emit('game:turn_result', lastResult);
+        
+        // Enrich result with winner player info
+        let enrichedResult = { ...lastResult };
+        if (lastResult.winner) {
+          const winnerPlayer = game.players.find(p => p.id === lastResult.winner);
+          if (winnerPlayer) {
+            enrichedResult = {
+              ...enrichedResult,
+              winnerInfo: {
+                id: winnerPlayer.id,
+                username: winnerPlayer.username,
+                currentBet: winnerPlayer.currentBet,
+              }
+            };
+          }
+        }
+        
+        io.to(roomCode).emit('game:turn_result', enrichedResult);
         sent.add(resultKey);
       }
     }

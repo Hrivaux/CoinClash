@@ -15,44 +15,36 @@ export class EconomyManager {
     const options = game.options;
     const bonuses: string[] = [];
     
-    let pointsGained = 2; // Base win reward
-    let coinsGained = 8;  // Base win reward
+    // Récompense de victoire dynamique basée sur la mise
+    let pointsGained = 1;  // Base: 1 point
+    let coinsGained = Math.ceil((winner.currentBet || 0) * 0.6); // 60% de la mise misée
     let coinsLost = winner.currentBet || 0;
+    
+    // Minimum de 2 pièces gagnées même si on mise petit
+    if (coinsGained < 2) {
+      coinsGained = 2;
+    }
+    
+    // Bonus de risque: si tu mises beaucoup, tu gagnes plus
+    const betRatio = (winner.currentBet || 0) / options.maxBet;
+    if (betRatio >= 0.75) {
+      pointsGained += 1;  // +1 point si tu mises 75% du max
+      bonuses.push('Risk bonus: +1 point for high bet');
+    }
     
     // Module: Dynamic Economy
     if (options.modules.dynamicEconomy) {
-      // Anti-snowball: if winner has > 90 coins, reduce coin reward
-      if (winner.coins >= 90) {
-        coinsGained = Math.max(4, coinsGained - 2);
-        bonuses.push('High balance penalty: -2 coins');
+      // Anti-snowball: if winner is far ahead, reduce rewards
+      const avgCoins = game.players.reduce((sum, p) => sum + p.coins, 0) / game.players.length;
+      if (winner.coins > avgCoins * 1.5) {
+        coinsGained = Math.max(1, Math.floor(coinsGained * 0.7));
+        bonuses.push('Leader penalty: -30% coins');
       }
       
-      // Comeback bonus: if winner is last in points
-      const isLastPlace = this.isLastPlace(game, winner);
-      if (isLastPlace) {
-        coinsGained += 2;
-        bonuses.push('Comeback bonus: +2 coins');
-      }
-    }
-    
-    // Event modifiers
-    if (game.currentEvent) {
-      switch (game.currentEvent.effect) {
-        case 'bounty':
-          coinsGained += 5;
-          bonuses.push('Bounty event: +5 coins');
-          break;
-        case 'tax':
-          coinsGained += 10;
-          bonuses.push('Tax pot: +10 coins');
-          break;
-        case 'lucky_seven':
-          if (winner.currentBet === 7) {
-            pointsGained *= 2;
-            coinsGained *= 2;
-            bonuses.push('Lucky 7: rewards doubled!');
-          }
-          break;
+      // Comeback bonus: if winner is below average
+      if (winner.coins < avgCoins * 0.6) {
+        coinsGained = Math.ceil(coinsGained * 1.5);
+        bonuses.push('Comeback bonus: +50% coins');
       }
     }
     
@@ -75,8 +67,16 @@ export class EconomyManager {
     const bonuses: string[] = [];
     
     let pointsGained = 0;
-    let coinsGained = 0; // Losers don't receive coins (except special events)
+    let coinsGained = 0;
     let coinsLost = player.currentBet || 0;
+    
+    // Losers with very low coins get a small recovery boost
+    const avgCoins = game.players.reduce((sum, p) => sum + p.coins, 0) / game.players.length;
+    if (player.coins - coinsLost < avgCoins * 0.3) {
+      // If you'd fall below 30% of average, get some compensation
+      coinsGained = Math.ceil(coinsLost * 0.25); // Recover 25% of your lost bet
+      bonuses.push('Low balance recovery: +' + coinsGained + ' coins');
+    }
     
     // Check for "shield" card: player doesn't lose coins
     if (game.shieldedPlayers?.has(player.id)) {
@@ -84,16 +84,13 @@ export class EconomyManager {
       bonuses.push('Shield card: coins protected');
     }
     
-    // Event modifiers (only charity event gives coins to losers)
+    // Event modifiers
     if (game.currentEvent) {
       if (game.currentEvent.effect === 'charity') {
-        coinsGained += 2;
-        bonuses.push('Charity event: +2 coins');
+        coinsGained += 3; // Charity gives more help
+        bonuses.push('Charity event: +3 coins');
       }
     }
-    
-    // Note: Removed dynamic economy compensation for losers
-    // Losers should not receive coins when they lose
     
     return {
       pointsGained,
@@ -113,8 +110,10 @@ export class EconomyManager {
     const bonuses: string[] = [];
     
     let coinsLost = player.currentBet || 0;
-    let coinsGained = 1; // Compensation to avoid total poverty
-    bonuses.push('No winner compensation: +1 coin');
+    let coinsGained = Math.ceil(coinsLost * 0.5); // Return 50% of bet as compensation
+    if (coinsGained < 1) coinsGained = 1;
+    
+    bonuses.push('Tie compensation: +'  + coinsGained + ' coin(s)');
     
     return {
       pointsGained: 0,
@@ -129,7 +128,7 @@ export class EconomyManager {
    */
   static handleBreakMode(player: Player): void {
     player.isInBreak = true;
-    player.coins = 18; // Recovery amount
+    player.coins = 10; // Reduced from 18 to 10 - more risky
   }
   
   /**

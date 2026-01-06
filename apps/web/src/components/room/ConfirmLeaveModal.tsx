@@ -55,9 +55,16 @@ export default function ConfirmLeaveModal({
               <p className="text-body mb-6">
                 {isInGame ? (
                   <>
-                    Vous êtes actuellement en partie. Si vous quittez maintenant, vous perdrez votre progression de ce tour.
+                    <strong className="text-orange-400">⚠️ Attention : Partie en cours</strong>
                     <br /><br />
-                    Êtes-vous sûr de vouloir quitter ?
+                    Vous allez quitter une partie active. Si vous quittez maintenant:
+                    <ul className="list-disc list-inside mt-2 ml-2 space-y-1 text-sm">
+                      <li>Votre progression du tour sera perdue</li>
+                      <li>Les autres joueurs seront notifiés</li>
+                      <li>Vous pouvez vous reconnecter à la partie en accédant directement au lien</li>
+                    </ul>
+                    <br />
+                    <strong>Êtes-vous vraiment sûr ?</strong>
                   </>
                 ) : (
                   <>

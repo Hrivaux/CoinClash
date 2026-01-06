@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Inter, Space_Grotesk } from 'next/font/google'
 import './globals.css'
 import { AuthProvider } from '@/components/providers/AuthProvider'
+import { ThemeProvider } from '@/components/providers/ThemeProvider'
 import NotificationManager from '@/components/notifications/NotificationManager'
 
 const inter = Inter({ 
@@ -27,10 +28,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.variable} ${spaceGrotesk.variable} antialiased`}>
-        <AuthProvider>
-          {children}
-          <NotificationManager />
-        </AuthProvider>
+        <ThemeProvider>
+          <AuthProvider>
+            {children}
+            <NotificationManager />
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   )

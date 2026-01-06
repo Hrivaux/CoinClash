@@ -86,12 +86,12 @@ export type GameMode = 'standard' | 'sprint';
 
 export const DEFAULT_GAME_OPTIONS: GameOptions = {
   mode: 'standard',
-  startingCoins: 60,
-  coinCap: 120,
+  startingCoins: 35,        // Réduit à 35 - ~4-5 tours max
+  coinCap: 90,              // Réduit à 90 - limite l'accumulation
   minBet: 1,
-  maxBet: 12,
-  pointsToWin: 50,
-  maxTurns: 30,
+  maxBet: 8,                // Équilibré pour 2+ joueurs
+  pointsToWin: 30,          // Parties courtes et intenses
+  maxTurns: 20,             // Tempo serré
   modules: {
     dynamicEconomy: true,
     specialCards: true,
@@ -107,8 +107,11 @@ export const DEFAULT_GAME_OPTIONS: GameOptions = {
 
 export const SPRINT_MODE_OPTIONS: Partial<GameOptions> = {
   mode: 'sprint',
-  pointsToWin: 20,
-  maxTurns: 12,
+  startingCoins: 25,        // Encore moins pour sprint - ~3 tours max
+  maxBet: 6,                // Max bet réduit aussi
+  pointsToWin: 20,          // Moins de points
+  maxTurns: 12,             // Moins de tours
+  coinCap: 60,              // Cap réduit pour sprint
 };
 
 // ============================================
