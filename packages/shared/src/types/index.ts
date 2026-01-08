@@ -160,7 +160,8 @@ export type GamePhase =
   | 'instant_cards'  // D: Double, Shield, Sabotage
   | 'reveal'         // E: Simultaneous reveal
   | 'resolution'     // F: Calculate winner
-  | 'end_turn';      // G: Stats update
+  | 'end_turn'       // G: Stats update
+  | 'game_end';      // H: Game finished
 
 // ============================================
 // TURN & RESULTS
