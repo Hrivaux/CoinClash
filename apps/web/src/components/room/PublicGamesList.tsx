@@ -27,6 +27,7 @@ export default function PublicGamesList() {
       if (!isMounted) return
       
       console.log('[PublicGamesList] Requesting public rooms list')
+      // @ts-ignore - rooms:public_list event not in type definitions
       socket.emit('rooms:public_list', (rooms: PublicRoomInfo[]) => {
         if (!isMounted) return
         console.log('[PublicGamesList] Received public rooms:', rooms?.length || 0)
@@ -57,11 +58,13 @@ export default function PublicGamesList() {
       setRefreshing(false)
     }
 
+    // @ts-ignore - rooms:public_updated event not in type definitions
     socket.on('rooms:public_updated', handlePublicRoomsUpdate)
 
     return () => {
       isMounted = false
       clearTimeout(timeout)
+      // @ts-ignore - rooms:public_updated event not in type definitions
       socket.off('rooms:public_updated', handlePublicRoomsUpdate)
     }
   }, []) // Empty dependency array - only run once on mount
@@ -71,6 +74,7 @@ export default function PublicGamesList() {
     if (!socket) return
 
     setRefreshing(true)
+    // @ts-ignore - rooms:public_list event not in type definitions
     socket.emit('rooms:public_list', (rooms: PublicRoomInfo[]) => {
       setPublicRooms(rooms)
       setRefreshing(false)

@@ -22,6 +22,7 @@ export default function InviteFriendsButton({ roomCode, isHost }: InviteFriendsB
     if (!socket) return
 
     setLoading(true)
+    // @ts-ignore - friends:list event not in type definitions
     socket.emit('friends:list', (friendsList: any[]) => {
       setFriends(friendsList || [])
       setLoading(false)

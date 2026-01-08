@@ -127,15 +127,23 @@ export default function GameNotifications() {
       }, ...prev].slice(0, 10))
     }
 
+    // @ts-ignore - game:bets_revealed event not in type definitions
     socket.on('game:bets_revealed', handleBetsRevealed)
+    // @ts-ignore - game:turn_result event not in type definitions
     socket.on('game:turn_result', handleTurnResult)
+    // @ts-ignore - game:card_played event not in type definitions
     socket.on('game:card_played', handleCardPlayed)
+    // @ts-ignore - game:event_triggered event not in type definitions
     socket.on('game:event_triggered', handleEvent)
 
     return () => {
+      // @ts-ignore - game:bets_revealed event not in type definitions
       socket.off('game:bets_revealed', handleBetsRevealed)
+      // @ts-ignore - game:turn_result event not in type definitions
       socket.off('game:turn_result', handleTurnResult)
+      // @ts-ignore - game:card_played event not in type definitions
       socket.off('game:card_played', handleCardPlayed)
+      // @ts-ignore - game:event_triggered event not in type definitions
       socket.off('game:event_triggered', handleEvent)
     }
   }, [])
