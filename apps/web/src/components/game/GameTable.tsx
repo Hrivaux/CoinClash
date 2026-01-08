@@ -161,8 +161,8 @@ export default function GameTable({ game, currentPlayerId }: GameTableProps) {
                 {phaseInfo.subtitle}
               </p>
 
-              {/* Pot Display */}
-              {pot > 0 && (
+              {/* Pot Display - Masqué pendant la phase de mise pour éviter de révéler les mises */}
+              {pot > 0 && game.phase !== 'betting' && (
                 <motion.div
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
