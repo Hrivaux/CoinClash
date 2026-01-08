@@ -37,6 +37,7 @@ export const useNotificationStore = create<NotificationStore>((set) => ({
   unreadCount: 0,
   
   addNotification: (notification) => set((state) => {
+    console.log('[NOTIF STORE] Adding notification:', notification);
     const newNotification: Notification = {
       ...notification,
       id: `${Date.now()}-${Math.random()}`,
@@ -46,6 +47,9 @@ export const useNotificationStore = create<NotificationStore>((set) => ({
     
     const newNotifications = [newNotification, ...state.notifications];
     const unreadCount = newNotifications.filter(n => !n.read).length;
+    
+    console.log('[NOTIF STORE] New notifications count:', newNotifications.length);
+    console.log('[NOTIF STORE] Unread count:', unreadCount);
     
     return {
       notifications: newNotifications,

@@ -10,6 +10,8 @@ export default function NotificationManager() {
   const { addNotification } = useNotificationStore()
   const { playerId } = useGameStore()
 
+  console.log('[NOTIF] NotificationManager mounted, playerId:', playerId)
+
   useEffect(() => {
     const socket = socketManager.getSocket()
     if (!socket) {
@@ -18,6 +20,17 @@ export default function NotificationManager() {
     }
 
     console.log('[NOTIF] Setting up notification listeners...')
+
+    // Test: Ajouter une notification de test au démarrage
+    setTimeout(() => {
+      console.log('[NOTIF] Adding test notification...')
+      addNotification({
+        type: 'system',
+        title: 'Centre de notifications actif',
+        message: 'Les notifications sont prêtes à fonctionner !',
+        actionable: false,
+      })
+    }, 2000)
 
     // Invitations de lobby
     const handleLobbyInvitation = (invitation: any) => {

@@ -29,9 +29,21 @@ interface NotificationCenterProps {
 
 export default function NotificationCenter({ onClose }: NotificationCenterProps) {
   const router = useRouter()
-  const { notifications, unreadCount, markAsRead, markAllAsRead, removeNotification, clearAll } = useNotificationStore()
+  const { notifications, unreadCount, markAsRead, markAllAsRead, removeNotification, clearAll, addNotification } = useNotificationStore()
   const { playerId, currentGame } = useGameStore()
   const [filter, setFilter] = useState<'all' | 'unread' | 'actionable'>('all')
+
+  console.log('[NOTIF CENTER] Rendering with', notifications.length, 'notifications')
+
+  const addTestNotification = () => {
+    console.log('[NOTIF CENTER] Adding test notification manually')
+    addNotification({
+      type: 'message',
+      title: 'Test de notification',
+      message: 'Ceci est une notification de test pour vérifier que le système fonctionne',
+      actionable: false,
+    })
+  }
 
   const filteredNotifications = notifications.filter(notif => {
     if (filter === 'unread') return !notif.read
@@ -219,7 +231,18 @@ export default function NotificationCenter({ onClose }: NotificationCenterProps)
           </div>
 
           {/* Actions */}
-          <div className="flex gap-2">
+          <div className="flex gap-2 items-center">
+            {/* Test Button */}
+            <motion.button
+              onClick={addTestNotification}
+              className="text-sm text-cyan-400 hover:text-cyan-300 font-medium flex items-center gap-2"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <Bell size={16} />
+              Test
+            </motion.button>
+            
             {unreadCount > 0 && (
               <motion.button
                 onClick={markAllAsRead}
