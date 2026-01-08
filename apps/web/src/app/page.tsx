@@ -456,7 +456,7 @@ export default function Home() {
                   
                   <motion.button
                     onClick={() => setShowJoinRoom(true)}
-                    disabled={currentGame && currentGame.status === 'playing'}
+                    disabled={!!(currentGame && currentGame.status === 'playing')}
                     className="btn-apple-secondary w-full sm:w-auto min-w-[220px] flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed text-base py-4"
                     whileHover={!(currentGame && currentGame.status === 'playing') ? { scale: 1.02, y: -2 } : {}}
                     whileTap={!(currentGame && currentGame.status === 'playing') ? { scale: 0.98 } : {}}
