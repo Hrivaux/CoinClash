@@ -822,6 +822,21 @@ export function setupSocketHandlers(
     }
   });
 
+  /**
+   * Reject invitation
+   */
+  socket.on('invite:reject', (inviteId) => {
+    try {
+      const invitation = friendManager.getInvitation(inviteId);
+      if (invitation) {
+        friendManager.deleteInvitation(inviteId);
+        console.log(`[SOCKET] Invitation ${inviteId} rejected by ${socket.id}`);
+      }
+    } catch (error) {
+      console.error('[SOCKET] Error rejecting invitation:', error);
+    }
+  });
+
   // ========================================
   // FRIEND SYSTEM (Database-backed)
   // ========================================
@@ -883,8 +898,20 @@ export function setupSocketHandlers(
       callback(success);
 
       if (success) {
-        // Notify the other user
-        io.emit('friends:request_received', fromUserId);
+        // Get sender profile for notification
+        const senderProfile = await userService.getUserProfile(fromUserId);
+        
+        // Notify the other user with full details
+        const recipientSocketId = connectedUsers.get(toUserId);
+        if (recipientSocketId && senderProfile) {
+          io.to(recipientSocketId).emit('friend:request', {
+            id: fromUserId,
+            username: senderProfile.username,
+            level: senderProfile.level,
+            avatar: senderProfile.avatar,
+          });
+          console.log(`[FRIENDS] Request notification sent to ${toUserId}`);
+        }
       }
     } catch (error) {
       console.error('[SOCKET] Error sending friend request:', error);
@@ -904,8 +931,21 @@ export function setupSocketHandlers(
       callback(success);
 
       if (success) {
-        // Notify both users
-        io.emit('friends:request_accepted', { userId, requesterId });
+        // Get both profiles for notifications
+        const userProfile = await userService.getUserProfile(userId);
+        const requesterProfile = await userService.getUserProfile(requesterId);
+        
+        // Notify the requester that their request was accepted
+        const requesterSocketId = connectedUsers.get(requesterId);
+        if (requesterSocketId && userProfile) {
+          io.to(requesterSocketId).emit('friend:accepted', {
+            id: userId,
+            username: userProfile.username,
+            level: userProfile.level,
+            avatar: userProfile.avatar,
+          });
+          console.log(`[FRIENDS] Acceptance notification sent to ${requesterId}`);
+        }
       }
     } catch (error) {
       console.error('[SOCKET] Error accepting friend request:', error);
@@ -1040,14 +1080,18 @@ export function setupSocketHandlers(
       const success = await userService.sendMessage(fromUserId, toUserId, message);
       
       if (success) {
+        // Get sender profile for notification
+        const senderProfile = await userService.getUserProfile(fromUserId);
+        
         // Notify recipient in real-time if they're connected
         const recipientSocketId = connectedUsers.get(toUserId);
-        if (recipientSocketId) {
-          io.to(recipientSocketId).emit('message:received', {
-            from: fromUserId,
-            to: toUserId,
+        if (recipientSocketId && senderProfile) {
+          io.to(recipientSocketId).emit('message:private', {
+            fromId: fromUserId,
+            fromUsername: senderProfile.username,
             message,
             timestamp: Date.now(),
+            id: `${Date.now()}-${Math.random()}`,
           });
           console.log(`[MESSAGE] Sent to ${toUserId} (socket: ${recipientSocketId})`);
         }

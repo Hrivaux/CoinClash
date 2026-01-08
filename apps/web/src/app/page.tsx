@@ -17,7 +17,8 @@ import {
   Clock,
   Gamepad2,
   Star,
-  Award
+  Award,
+  Bell
 } from 'lucide-react'
 import JoinRoomModal from '@/components/room/JoinRoomModal'
 import FriendsPanel from '@/components/social/FriendsPanel'
@@ -26,17 +27,21 @@ import LeaderboardPanel from '@/components/leaderboard/LeaderboardPanel'
 import PublicGamesList from '@/components/room/PublicGamesList'
 import Footer from '@/components/layout/Footer'
 import ActiveGameBlock from '@/components/game/ActiveGameBlock'
+import NotificationCenter from '@/components/notifications/NotificationCenter'
 import { useGameStore } from '@/stores/useGameStore'
+import { useNotificationStore } from '@/stores/useNotificationStore'
 import { supabase } from '@/lib/supabase'
 import { socketManager } from '@/lib/socket'
 
 export default function Home() {
   const router = useRouter()
   const { username, playerId, setUsername, setPlayerId, currentGame, currentRoom } = useGameStore()
+  const { unreadCount } = useNotificationStore()
   const [showJoinRoom, setShowJoinRoom] = useState(false)
   const [showFriends, setShowFriends] = useState(false)
   const [showProfile, setShowProfile] = useState(false)
   const [showLeaderboard, setShowLeaderboard] = useState(false)
+  const [showNotifications, setShowNotifications] = useState(false)
   const [isPrivateLobby, setIsPrivateLobby] = useState(true)
   const [loading, setLoading] = useState(true)
   const [creating, setCreating] = useState(false)
@@ -118,18 +123,61 @@ export default function Home() {
     setCheckingGame(false)
   }
 
-  const loadUserStats = () => {
+  const loadUserStats = async () => {
     if (!playerId) return
 
-    // TODO: Implémenter la récupération du profil via Supabase
-    // Pour l'instant, initialiser avec des valeurs par défaut
-    setUserStats({
-      level: 1,
-      xp: 0,
-      gamesWon: 0,
-      gamesPlayed: 0,
-      badges: 0,
-    })
+    try {
+      // Récupérer le profil utilisateur depuis Supabase
+      const { data: user } = await supabase
+        .from('users')
+        .select('id, username')
+        .eq('id', playerId)
+        .single();
+
+      if (!user) {
+        console.error('[HOME] User not found in database');
+        return;
+      }
+
+      // Récupérer le profil
+      const { data: profile } = await supabase
+        .from('user_profiles')
+        .select('level, xp')
+        .eq('id', playerId)
+        .single();
+
+      // Récupérer les statistiques
+      const { data: stats } = await supabase
+        .from('user_stats')
+        .select('games_played, games_won')
+        .eq('user_id', playerId)
+        .single();
+
+      // Récupérer le nombre de badges
+      const { data: badges } = await supabase
+        .from('user_badges')
+        .select('badge_id')
+        .eq('user_id', playerId);
+
+      // Mettre à jour les statistiques avec les vraies données
+      setUserStats({
+        level: profile?.level || 1,
+        xp: profile?.xp || 0,
+        gamesWon: stats?.games_won || 0,
+        gamesPlayed: stats?.games_played || 0,
+        badges: badges?.length || 0,
+      });
+    } catch (error) {
+      console.error('[HOME] Error loading user stats:', error);
+      // En cas d'erreur, utiliser des valeurs par défaut
+      setUserStats({
+        level: 1,
+        xp: 0,
+        gamesWon: 0,
+        gamesPlayed: 0,
+        badges: 0,
+      });
+    }
   }
 
   const handleLogout = async () => {
@@ -246,6 +294,25 @@ export default function Home() {
             </motion.div>
             
             <div className="flex items-center gap-3">
+              {/* Notification Bell */}
+              <motion.button
+                onClick={() => setShowNotifications(true)}
+                className="liquid-glass-hover px-3 py-2 rounded-xl text-sm font-medium flex items-center gap-2 relative"
+                whileHover={{ scale: 1.02, y: -1 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <Bell size={18} />
+                {unreadCount > 0 && (
+                  <motion.span
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-red-500 text-white text-xs flex items-center justify-center font-bold"
+                  >
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </motion.span>
+                )}
+              </motion.button>
+
               <motion.button
                 onClick={() => setShowProfile(true)}
                 className="liquid-glass-hover px-4 py-2 rounded-xl flex items-center gap-2 text-sm font-medium"
@@ -715,12 +782,15 @@ export default function Home() {
       <AnimatePresence>
         {showFriends && <FriendsPanel onClose={() => setShowFriends(false)} />}
       </AnimatePresence>
-          <AnimatePresence>
-            {showProfile && <ProfilePanel onClose={() => setShowProfile(false)} />}
-          </AnimatePresence>
-          <AnimatePresence>
-            {showLeaderboard && <LeaderboardPanel onClose={() => setShowLeaderboard(false)} />}
-          </AnimatePresence>
+      <AnimatePresence>
+        {showProfile && <ProfilePanel onClose={() => setShowProfile(false)} />}
+      </AnimatePresence>
+      <AnimatePresence>
+        {showLeaderboard && <LeaderboardPanel onClose={() => setShowLeaderboard(false)} />}
+      </AnimatePresence>
+      <AnimatePresence>
+        {showNotifications && <NotificationCenter onClose={() => setShowNotifications(false)} />}
+      </AnimatePresence>
         </div>
       )
     }

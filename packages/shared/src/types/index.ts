@@ -399,6 +399,12 @@ export interface ServerToClientEvents {
   'friend:accepted': (friend: Friend) => void;
   'invitation:received': (invitation: Invitation) => void;
   'lobby:invitation_received': (invitation: LobbyInvitation) => void;
+  'message:private': (data: { fromId: string; fromUsername: string; message: string; timestamp: number; id: string }) => void;
+  'message:received': (data: { from: string; to: string; message: string; timestamp: number }) => void;
+  
+  // Notifications
+  'achievement:unlocked': (data: { id: string; name: string; description: string }) => void;
+  'player:level_up': (data: { newLevel: number; xpGained: number }) => void;
   
   // Errors
   'error': (message: string) => void;
@@ -447,9 +453,11 @@ export interface ClientToServerEvents {
   // Social
   'friend:add': (username: string) => void;
   'friend:accept': (friendId: PlayerId) => void;
+  'friend:reject': (friendId: PlayerId) => void;
   'friend:remove': (friendId: PlayerId) => void;
   'invite:send': (friendId: PlayerId, roomCode: RoomCode) => void;
   'invite:accept': (inviteId: string) => void;
+  'invite:reject': (inviteId: string) => void;
 }
 
 export interface PlayerRanking {
