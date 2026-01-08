@@ -27,6 +27,9 @@ export default function GameTable({ game, currentPlayerId }: GameTableProps) {
   const currentPlayer = game.players.find(p => p.id === currentPlayerId)
   const otherPlayers = game.players.filter(p => p.id !== currentPlayerId)
   const phaseInfo = phaseMessages[game.phase] || phaseMessages.betting
+  
+  // Calculate pot from all players' current bets
+  const pot = game.players.reduce((sum, player) => sum + (player.currentBet || 0), 0)
 
   return (
     <div className="relative min-h-screen bg-gradient-to-br from-[#0a0a0a] via-[#111] to-[#0a0a0a]">
@@ -159,14 +162,14 @@ export default function GameTable({ game, currentPlayerId }: GameTableProps) {
               </p>
 
               {/* Pot Display */}
-              {game.pot > 0 && (
+              {pot > 0 && (
                 <motion.div
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   className="mt-6 inline-flex items-center gap-2 liquid-glass px-6 py-3 rounded-full"
                 >
                   <Coins size={20} className="text-yellow-400" />
-                  <span className="text-2xl font-bold text-yellow-400">{game.pot}</span>
+                  <span className="text-2xl font-bold text-yellow-400">{pot}</span>
                   <span className="text-white/50 text-sm">dans le pot</span>
                 </motion.div>
               )}
