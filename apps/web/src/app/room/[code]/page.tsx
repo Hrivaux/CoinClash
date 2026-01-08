@@ -193,6 +193,7 @@ export default function RoomPage() {
     if (!socket) return
     
     // Émettre la mise à jour des options
+    // @ts-ignore - TODO: Ajouter 'room:update_options' aux types Socket
     socket.emit('room:update_options', updates)
   }
 
