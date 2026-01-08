@@ -1,0 +1,12 @@
+# Nixpacks config for Railway
+[phases.setup]
+nixPkgs = ["nodejs-18_x", "pnpm"]
+
+[phases.install]
+cmds = ["pnpm install --frozen-lockfile"]
+
+[phases.build]
+cmds = ["echo 'Skipping build - running in dev mode'"]
+
+[start]
+cmd = "cd apps/server && pnpm dev"
