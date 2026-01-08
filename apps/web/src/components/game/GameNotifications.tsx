@@ -44,7 +44,7 @@ export default function GameNotifications() {
         
         newNotifications.push({
           id: `bet-${playerId}-${Date.now()}`,
-          type: 'bet',
+          type: 'bet' as const,
           message: `${playerName} a misé ${amount} pièce${amount > 1 ? 's' : ''}`,
           playerName,
           amount,
@@ -99,7 +99,7 @@ export default function GameNotifications() {
       
       setNotifications(prev => [{
         id: uniqueId,
-        type: 'card',
+        type: 'card' as const,
         message: `${cardData.playerName || 'Un joueur'} a joué la carte "${cardData.cardName}"`,
         playerName: cardData.playerName,
         icon: '🃏',
@@ -120,7 +120,7 @@ export default function GameNotifications() {
       
       setNotifications(prev => [{
         id: uniqueId,
-        type: 'event',
+        type: 'event' as const,
         message: `🎰 ${event.name}: ${event.description}`,
         icon: '🎰',
         timestamp: Date.now(),
