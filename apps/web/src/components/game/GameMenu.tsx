@@ -43,6 +43,7 @@ export default function GameMenu({ currentPlayerId, players, onLeave }: GameMenu
     }
 
     // Sinon, demander au serveur
+    // @ts-ignore - TODO: Ajouter 'player:get_supabase_id' aux types Socket
     socket.emit('player:get_supabase_id', socketId, (supabaseId: string | null) => {
       callback(supabaseId)
     })
