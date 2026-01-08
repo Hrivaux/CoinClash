@@ -445,7 +445,7 @@ export default function Home() {
                 <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
                   <motion.button
                     onClick={handleCreateLobby}
-                    disabled={creating || (currentGame && currentGame.status === 'playing')}
+                    disabled={creating || !!(currentGame && currentGame.status === 'playing')}
                     className="btn-apple w-full sm:w-auto min-w-[220px] flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed text-base py-4"
                     whileHover={!creating && !(currentGame && currentGame.status === 'playing') ? { scale: 1.02, y: -2 } : {}}
                     whileTap={!creating && !(currentGame && currentGame.status === 'playing') ? { scale: 0.98 } : {}}
