@@ -25,7 +25,7 @@ export default function BettingSlider({
   const maxBet = Math.min(max, currentCoins)
 
   // Generate quick bet amounts
-  const quickBets = []
+  const quickBets: number[] = []
   const step = Math.max(1, Math.floor(maxBet / 5))
   for (let i = 1; i <= 5; i++) {
     const amount = Math.min(min + (step * i) - step, maxBet)
