@@ -1,6 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "cd ../.. && pnpm install --frozen-lockfile && pnpm --filter @coin-clash/shared build && pnpm --filter @coin-clash/web build",
+  "buildCommand": "cd ../.. && pnpm --filter @coin-clash/shared build && pnpm --filter @coin-clash/web build",
   "devCommand": "pnpm dev",
   "installCommand": "cd ../.. && pnpm install --frozen-lockfile",
   "framework": "nextjs",
