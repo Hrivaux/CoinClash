@@ -458,6 +458,10 @@ export interface ClientToServerEvents {
   'invite:send': (friendId: PlayerId, roomCode: RoomCode) => void;
   'invite:accept': (inviteId: string) => void;
   'invite:reject': (inviteId: string) => void;
+  
+  // Messages
+  'message:send': (toUserId: string, message: string, callback: (success: boolean) => void) => void;
+  'message:get': (otherUserId: string, callback: (messages: any[]) => void) => void;
 }
 
 export interface PlayerRanking {

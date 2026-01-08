@@ -81,10 +81,10 @@ export default function FriendPanel({ onClose }: FriendsPanelProps) {
 
     // Listen for real-time messages
     const handleMessageReceived = (data: any) => {
-      if (selectedFriend && (data.from === selectedFriend.id || data.to === selectedFriend.id)) {
+      if (selectedFriend && (data.fromId === selectedFriend.id)) {
         const newMessage: Message = {
-          id: Date.now().toString(),
-          senderId: data.from,
+          id: data.id || Date.now().toString(),
+          senderId: data.fromId,
           text: data.message,
           timestamp: data.timestamp
         }
@@ -99,8 +99,8 @@ export default function FriendPanel({ onClose }: FriendsPanelProps) {
       }
     }
 
-    // @ts-ignore - message:received event not in type definitions
-    socket.on('message:received', handleMessageReceived)
+    // @ts-ignore - message:private event not in type definitions
+    socket.on('message:private', handleMessageReceived)
     // @ts-ignore - game:invitation_received event not in type definitions
     socket.on('game:invitation_received', handleInvitationReceived)
 
@@ -122,8 +122,8 @@ export default function FriendPanel({ onClose }: FriendsPanelProps) {
     })
 
     return () => {
-      // @ts-ignore - message:received event not in type definitions
-      socket.off('message:received', handleMessageReceived)
+      // @ts-ignore - message:private event not in type definitions
+      socket.off('message:private', handleMessageReceived)
       // @ts-ignore - game:invitation_received event not in type definitions
       socket.off('game:invitation_received', handleInvitationReceived)
       // @ts-ignore - friends:request_received event not in type definitions
