@@ -9,7 +9,8 @@
   ],
   "scripts": {
     "dev": "turbo run dev",
-    "build": "turbo run build",
+    "build": "turbo run build --filter=@coin-clash/web --filter=@coin-clash/shared",
+    "vercel-build": "turbo run build --filter=@coin-clash/web --filter=@coin-clash/shared",
     "start": "turbo run start",
     "lint": "turbo run lint",
     "clean": "turbo run clean && rm -rf node_modules"
