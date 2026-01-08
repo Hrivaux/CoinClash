@@ -28,9 +28,11 @@ export default function SpyReveal() {
       })
     }
 
+    // @ts-ignore - game:spy_reveal event not in type definitions
     socket.on('game:spy_reveal', handleSpyReveal)
 
     return () => {
+      // @ts-ignore - game:spy_reveal event not in type definitions
       socket.off('game:spy_reveal', handleSpyReveal)
     }
   }, [])
