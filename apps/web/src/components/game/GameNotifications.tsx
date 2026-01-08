@@ -76,7 +76,7 @@ export default function GameNotifications() {
         
         setNotifications(prev => [{
           id: uniqueId,
-          type: 'winner',
+          type: 'winner' as const,
           message: `🏆 ${winnerUsername} remporte ce tour avec ${winnerBet} pièces !`,
           playerName: winnerUsername,
           amount: winnerBet,
