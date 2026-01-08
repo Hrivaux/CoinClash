@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 
 export type NotificationType = 
   | 'friend_request'
@@ -32,9 +33,11 @@ interface NotificationStore {
   clearAll: () => void;
 }
 
-export const useNotificationStore = create<NotificationStore>((set) => ({
-  notifications: [],
-  unreadCount: 0,
+export const useNotificationStore = create<NotificationStore>()(
+  persist(
+    (set) => ({
+      notifications: [],
+      unreadCount: 0,
   
   addNotification: (notification) => set((state) => {
     console.log('[NOTIF STORE] Adding notification:', notification);
@@ -85,7 +88,16 @@ export const useNotificationStore = create<NotificationStore>((set) => ({
   }),
   
   clearAll: () => set({
-    notifications: [],
+  ,
+    {
+      name: 'notification-storage', // nom unique pour localStorage
+      partialize: (state) => ({
+        notifications: state.notifications,
+        unreadCount: state.unreadCount,
+      }),
+    }
+  )
+  notifications: [],
     unreadCount: 0,
   }),
 }));

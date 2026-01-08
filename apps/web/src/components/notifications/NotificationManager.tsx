@@ -137,6 +137,11 @@ export default function NotificationManager() {
       socket.on('player:level_up', handleLevelUp)
 
       console.log('[NOTIF] All listeners registered')
+      
+      // Debug: Logger tous les événements reçus
+      socket.onAny((eventName, ...args) => {
+        console.log(`[NOTIF DEBUG] Event received: ${eventName}`, args)
+      })
 
       return true
     }

@@ -1171,6 +1171,8 @@ export function setupSocketHandlers(
         // Check if friend is online
         const friendSocketId = connectedUsers.get(friendId);
         
+        console.log(`[INVITE] Checking friend ${friendId}, socketId: ${friendSocketId}, isOnline: ${!!friendSocketId}`);
+        
         if (friendSocketId) {
           // Friend is online - send real-time notification
           const invitation: any = {
@@ -1181,8 +1183,9 @@ export function setupSocketHandlers(
             createdAt: Date.now(),
           };
           
+          console.log(`[INVITE] Emitting lobby:invitation_received to ${friendSocketId}`, invitation);
           io.to(friendSocketId).emit('lobby:invitation_received', invitation);
-          console.log(`[INVITE] Sent lobby invitation to online friend ${friendId}`);
+          console.log(`[INVITE] ✅ Sent lobby invitation to online friend ${friendId}`);
         } else {
           // Friend is offline - save to database for later
           try {
