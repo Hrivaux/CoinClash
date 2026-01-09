@@ -88,16 +88,16 @@ export const useNotificationStore = create<NotificationStore>()(
   }),
   
   clearAll: () => set({
-  ,
+    notifications: [],
+    unreadCount: 0,
+  }),
+}),
     {
-      name: 'notification-storage', // nom unique pour localStorage
+      name: 'notification-storage',
       partialize: (state) => ({
         notifications: state.notifications,
         unreadCount: state.unreadCount,
       }),
     }
   )
-  notifications: [],
-    unreadCount: 0,
-  }),
-}));
+);
