@@ -34,33 +34,33 @@ export default function AuthCallbackPage() {
                       `User_${session.user.id.substring(0, 8)}`
 
       // Vérifier si l'utilisateur existe déjà dans la base
-      const { data: existingUser, error: checkError } = await supabase
+      const { data: existingUsers } = await supabase
         .from('users')
         .select('id, username')
         .eq('id', session.user.id)
-        .single()
 
-      if (checkError && checkError.code !== 'PGRST116') {
-        throw checkError
-      }
+      const existingUser = existingUsers && existingUsers.length > 0 ? existingUsers[0] : null
 
       // Si l'utilisateur n'existe pas, le créer
       if (!existingUser) {
-        const { data: userData, error: userError } = await supabase
+        const { error: userError } = await supabase
           .from('users')
           .insert({
             id: session.user.id,
             username: username,
             email: session.user.email,
           })
-          .select()
-          .single()
 
-        if (userError) throw userError
-
-        // Créer les profils associés
-        await supabase.from('user_profiles').insert({ id: session.user.id })
-        await supabase.from('user_stats').insert({ user_id: session.user.id })
+        if (userError) {
+          // Si l'erreur est que l'utilisateur existe déjà, on l'ignore
+          if (userError.code !== '23505') {
+            throw userError
+          }
+        } else {
+          // Créer les profils associés seulement si l'insertion a réussi
+          await supabase.from('user_profiles').insert({ id: session.user.id })
+          await supabase.from('user_stats').insert({ user_id: session.user.id })
+        }
       }
 
       // Nettoyer le localStorage
