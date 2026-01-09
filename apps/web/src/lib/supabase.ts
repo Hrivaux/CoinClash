@@ -7,6 +7,12 @@ if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Missing Supabase environment variables');
 }
 
-// Client-side Supabase client
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Client-side Supabase client with auth configuration
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: true,
+  }
+});
 

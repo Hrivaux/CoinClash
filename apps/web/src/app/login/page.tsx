@@ -28,6 +28,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [successMessage, setSuccessMessage] = useState('')
 
   useEffect(() => {
     checkSession()
@@ -54,6 +55,7 @@ export default function LoginPage() {
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
+    setSuccessMessage('')
     setLoading(true)
 
     try {
@@ -69,14 +71,33 @@ export default function LoginPage() {
         return
       }
 
+      // Configuration pour l'inscription avec confirmation par email
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+          data: {
+            username: username,
+          }
+        }
       })
 
       if (authError) throw authError
       if (!authData.user) throw new Error('Échec de la création du compte')
 
+      // Si la confirmation email est requise, on affiche un message
+      if (authData.user && !authData.session) {
+        setSuccessMessage(
+          "Inscription réussie ! Veuillez vérifier votre email pour confirmer votre compte."
+        )
+        // Stocker temporairement le username pour l'utiliser après confirmation
+        localStorage.setItem('pending_username', username)
+        setLoading(false)
+        return
+      }
+
+      // Si l'email est automatiquement confirmé (développement)
       const { data: userData, error: userError } = await supabase
         .from('users')
         .insert({
@@ -287,6 +308,17 @@ export default function LoginPage() {
                   >
                     <AlertCircle size={16} />
                     {error}
+                  </motion.div>
+                )}
+                {successMessage && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="p-4 liquid-glass border border-green-500/30 rounded-xl text-green-300 text-sm font-medium flex items-center gap-2"
+                  >
+                    <Mail size={16} />
+                    {successMessage}
                   </motion.div>
                 )}
               </AnimatePresence>
