@@ -68,13 +68,13 @@ export default function Footer() {
             <h4 className="font-semibold mb-4 text-white/90">Jeu</h4>
             <ul className="space-y-2">
               {[
-                { icon: BookOpen, label: 'Règles du jeu' },
-                { icon: Trophy, label: 'Classement' },
-                { icon: Shield, label: 'Tournois' },
+                { icon: BookOpen, label: 'Règles du jeu', href: '/regles' },
+                { icon: Trophy, label: 'Classement', href: '#' },
+                { icon: Shield, label: 'Tournois', href: '#' },
               ].map((item, i) => (
                 <li key={i}>
                   <a
-                    href="#"
+                    href={item.href}
                     className="flex items-center gap-2 text-sm text-white/60 hover:text-white transition-colors group"
                   >
                     <item.icon size={14} className="group-hover:scale-110 transition-transform" />
